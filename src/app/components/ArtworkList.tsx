@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Artwork } from '@/lib/kv'
+import EditArtworkForm from './EditArtworkForm'
 
 export default function ArtworkList() {
   const [artworks, setArtworks] = useState<Artwork[]>([])
@@ -18,6 +19,7 @@ export default function ArtworkList() {
     styles: [],
     colors: []
   })
+  const [editingArtwork, setEditingArtwork] = useState<Artwork | null>(null)
 
   const loadArtworks = async () => {
     const queryParams = new URLSearchParams(
@@ -27,7 +29,7 @@ export default function ArtworkList() {
     const data = await res.json()
     
     // Filter artworks based on criteria
-    const filteredArtworks = data.filter(artwork => {
+    const filteredArtworks = data.filter((artwork: Artwork) => {
       const matchesArtist = !filters.artist || artwork.artist === filters.artist
       const matchesStyle = !filters.style || artwork.style === filters.style
       const matchesColor = !filters.color || artwork.colors.includes(filters.color)
@@ -50,6 +52,25 @@ export default function ArtworkList() {
     setUniqueValues({ artists, styles, colors })
   }
 
+  const handleSaveEdit = async (updatedArtwork: Artwork) => {
+    try {
+      const res = await fetch(`/api/artworks/${updatedArtwork.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedArtwork),
+      })
+      
+      if (res.ok) {
+        setEditingArtwork(null)
+        loadArtworks() // Reload the list
+      }
+    } catch (error) {
+      console.error('Error updating artwork:', error)
+    }
+  }
+
   useEffect(() => {
     loadUniqueValues()
     loadArtworks()
@@ -69,6 +90,19 @@ export default function ArtworkList() {
 
   return (
     <div>
+      {editingArtwork ? (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">Edit Artwork</h2>
+            <EditArtworkForm
+              artwork={editingArtwork}
+              onSave={handleSaveEdit}
+              onCancel={() => setEditingArtwork(null)}
+            />
+          </div>
+        </div>
+      ) : null}
+      
       <div className="mb-6 grid grid-cols-5 gap-4">
         <select
           name="artist"
@@ -153,6 +187,12 @@ export default function ArtworkList() {
                   ))}
                 </div>
               </div>
+              <button
+                onClick={() => setEditingArtwork(artwork)}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Edit
+              </button>
             </div>
           </div>
         ))}

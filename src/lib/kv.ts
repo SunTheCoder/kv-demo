@@ -146,4 +146,19 @@ export async function getArtwork(id: string) {
     console.error('Error getting artwork:', error)
     return null
   }
+}
+
+export async function updateArtwork(id: string, artwork: Artwork) {
+  try {
+    const artworkData = Object.entries(artwork).reduce((acc, [key, value]) => {
+      acc[key] = value
+      return acc
+    }, {} as Record<string, unknown>)
+    
+    await kv.hset(`artwork:${id}`, artworkData)
+    return true
+  } catch (error) {
+    console.error('Error updating artwork:', error)
+    return false
+  }
 } 
