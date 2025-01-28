@@ -2,242 +2,222 @@
 
 import { useState } from 'react'
 import { Artwork } from '@/lib/kv'
+import { Dimensions, DimensionUnit, formatDimensions } from '@/lib/types'
 
 interface AddArtworkFormProps {
-  onArtworkAdded?: () => void
+  onArtworkAdded: () => void
 }
 
 export default function AddArtworkForm({ onArtworkAdded }: AddArtworkFormProps) {
-  const [artwork, setArtwork] = useState<Partial<Artwork>>({
+  const [formData, setFormData] = useState({
     title: '',
     artist: '',
     year: new Date().getFullYear(),
     style: '',
     medium: '',
-    colors: [],
-    dimensions: '',
+    colors: [] as string[],
     description: '',
-    imageUrl: ''
+    imageUrl: '',
+    dimensions: {
+      width: 0,
+      height: 0,
+      unit: 'in' as DimensionUnit
+    } as Dimensions
   })
-  const [newColor, setNewColor] = useState('')
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [errorMessage, setErrorMessage] = useState('')
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setArtwork(prev => ({ ...prev, [name]: value }))
-  }
-
-  const handleAddColor = () => {
-    if (newColor && !artwork.colors?.includes(newColor)) {
-      setArtwork(prev => ({
-        ...prev,
-        colors: [...(prev.colors || []), newColor]
-      }))
-      setNewColor('')
-    }
-  }
-
-  const handleRemoveColor = (colorToRemove: string) => {
-    setArtwork(prev => ({
-      ...prev,
-      colors: prev.colors?.filter(color => color !== colorToRemove) || []
-    }))
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setStatus('loading')
-    setErrorMessage('')
-
     try {
       const response = await fetch('/api/artworks', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(artwork)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          dimensions: formatDimensions(formData.dimensions)
+        }),
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to add artwork')
+      if (response.ok) {
+        setFormData({
+          title: '',
+          artist: '',
+          year: new Date().getFullYear(),
+          style: '',
+          medium: '',
+          colors: [],
+          description: '',
+          imageUrl: '',
+          dimensions: {
+            width: 0,
+            height: 0,
+            unit: 'in' as DimensionUnit
+          }
+        })
+        onArtworkAdded()
       }
-
-      setStatus('success')
-      setArtwork({
-        title: '',
-        artist: '',
-        year: new Date().getFullYear(),
-        style: '',
-        medium: '',
-        colors: [],
-        dimensions: '',
-        description: '',
-        imageUrl: ''
-      })
-      
-      onArtworkAdded?.()
-
-      setTimeout(() => {
-        setStatus('idle')
-      }, 3000)
     } catch (error) {
-      setStatus('error')
-      setErrorMessage(error instanceof Error ? error.message : 'An error occurred')
+      console.error('Error adding artwork:', error)
     }
   }
 
+  const handleDimensionChange = (field: keyof Dimensions, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      dimensions: {
+        ...prev.dimensions,
+        [field]: field === 'unit' ? value : Number(value)
+      }
+    }))
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6 space-y-6 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-bold">Add New Artwork</h2>
-      
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Title</label>
-          <input
-            type="text"
-            name="title"
-            value={artwork.title}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded border-gray-300 shadow-sm text-gray-900"
-            required
-          />
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl mx-auto">
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Title</label>
+        <input
+          type="text"
+          value={formData.title}
+          onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Artist</label>
-          <input
-            type="text"
-            name="artist"
-            value={artwork.artist}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded border-gray-300 shadow-sm text-gray-900"
-            required
-          />
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Artist</label>
+        <input
+          type="text"
+          value={formData.artist}
+          onChange={e => setFormData(prev => ({ ...prev, artist: e.target.value }))}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Year</label>
-          <input
-            type="number"
-            name="year"
-            value={artwork.year}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded border-gray-300 shadow-sm text-gray-900"
-            required
-          />
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Year</label>
+        <input
+          type="number"
+          value={formData.year}
+          onChange={e => setFormData(prev => ({ ...prev, year: Number(e.target.value) }))}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Style</label>
-          <input
-            type="text"
-            name="style"
-            value={artwork.style}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded border-gray-300 shadow-sm text-gray-900"
-            required
-          />
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Dimensions</label>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <input
+              type="number"
+              value={formData.dimensions.width || ''}
+              onChange={e => handleDimensionChange('width', e.target.value)}
+              placeholder="Width"
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <input
+              type="number"
+              value={formData.dimensions.height || ''}
+              onChange={e => handleDimensionChange('height', e.target.value)}
+              placeholder="Height"
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <input
+              type="number"
+              value={formData.dimensions.depth || ''}
+              onChange={e => handleDimensionChange('depth', e.target.value)}
+              placeholder="Depth (optional)"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <select
+              value={formData.dimensions.unit}
+              onChange={e => handleDimensionChange('unit', e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            >
+              <option value="in">inches</option>
+              <option value="cm">centimeters</option>
+              <option value="ft">feet</option>
+              <option value="yd">yards</option>
+              <option value="m">meters</option>
+            </select>
+          </div>
         </div>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Medium</label>
-          <input
-            type="text"
-            name="medium"
-            value={artwork.medium}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded border-gray-300 shadow-sm text-gray-900"
-            required
-          />
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Style</label>
+        <input
+          type="text"
+          value={formData.style}
+          onChange={e => setFormData(prev => ({ ...prev, style: e.target.value }))}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Dimensions</label>
-          <input
-            type="text"
-            name="dimensions"
-            value={artwork.dimensions}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded border-gray-300 shadow-sm text-gray-900"
-            required
-          />
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Medium</label>
+        <input
+          type="text"
+          value={formData.medium}
+          onChange={e => setFormData(prev => ({ ...prev, medium: e.target.value }))}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Colors</label>
-        <div className="flex gap-2 mt-1">
-          <input
-            type="text"
-            value={newColor}
-            onChange={(e) => setNewColor(e.target.value)}
-            className="block w-full rounded border-gray-300 shadow-sm text-gray-900"
-            placeholder="Add a color"
-          />
-          <button
-            type="button"
-            onClick={handleAddColor}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Add
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {artwork.colors?.map(color => (
-            <span
-              key={color}
-              className="px-2 py-1 bg-gray-100 rounded-full flex items-center gap-2 text-gray-900"
-            >
-              {color}
-              <button
-                type="button"
-                onClick={() => handleRemoveColor(color)}
-                className="text-red-500 hover:text-red-700"
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Image URL</label>
         <input
-          type="url"
-          name="imageUrl"
-          value={artwork.imageUrl}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded border-gray-300 shadow-sm text-gray-900"
+          type="text"
+          value={formData.colors.join(', ')}
+          onChange={e => setFormData(prev => ({ ...prev, colors: e.target.value.split(',').map(c => c.trim()) }))}
+          placeholder="Separate colors with commas"
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Description</label>
         <textarea
-          name="description"
-          value={artwork.description}
-          onChange={handleChange}
-          rows={4}
-          className="mt-1 block w-full rounded border-gray-300 shadow-sm text-gray-900"
+          value={formData.description}
+          onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          rows={3}
           required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
       </div>
 
-      {status === 'error' && (
-        <div className="text-red-500">{errorMessage}</div>
-      )}
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Image URL</label>
+        <input
+          type="url"
+          value={formData.imageUrl}
+          onChange={e => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+      </div>
 
-      {status === 'success' && (
-        <div className="text-green-500">Artwork added successfully!</div>
-      )}
-
-      <button
-        type="submit"
-        disabled={status === 'loading'}
-        className="w-full py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
-      >
-        {status === 'loading' ? 'Adding...' : 'Add Artwork'}
-      </button>
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Add Artwork
+        </button>
+      </div>
     </form>
   )
 } 
