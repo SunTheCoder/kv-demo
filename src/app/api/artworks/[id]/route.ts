@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getArtwork, updateArtwork } from '@/lib/kv'
 
-interface RouteParams {
-  params: {
-    id: string
-  }
-}
+type Params = Promise<{ id: string }>
 
 export async function GET(
-  req: NextRequest,
-  context: RouteParams
+  request: Request,
+  { params }: { params: Params }
 ) {
   try {
-    const artwork = await getArtwork(context.params.id)
+    const { id } = await params
+    const artwork = await getArtwork(id)
     if (!artwork) {
       return NextResponse.json({ error: 'Artwork not found' }, { status: 404 })
     }
@@ -23,12 +20,13 @@ export async function GET(
 }
 
 export async function PUT(
-  req: NextRequest,
-  context: RouteParams
+  request: Request,
+  { params }: { params: Params }
 ) {
   try {
-    const artwork = await req.json()
-    const success = await updateArtwork(context.params.id, artwork)
+    const { id } = await params
+    const artwork = await request.json()
+    const success = await updateArtwork(id, artwork)
     
     if (success) {
       return NextResponse.json({ success: true })
