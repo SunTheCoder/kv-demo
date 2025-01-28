@@ -15,9 +15,9 @@ export default function ArtworkList() {
     yearEnd: ''
   })
   const [uniqueValues, setUniqueValues] = useState({
-    artists: [],
-    styles: [],
-    colors: []
+    artists: [] as string[],
+    styles: [] as string[],
+    colors: [] as string[]
   })
   const [editingArtwork, setEditingArtwork] = useState<Artwork | null>(null)
 
@@ -44,12 +44,20 @@ export default function ArtworkList() {
   }
 
   const loadUniqueValues = async () => {
-    const [artists, styles, colors] = await Promise.all([
-      fetch('/api/artworks/unique?field=artist').then(res => res.json()),
-      fetch('/api/artworks/unique?field=style').then(res => res.json()),
-      fetch('/api/artworks/unique?field=color').then(res => res.json())
-    ])
-    setUniqueValues({ artists, styles, colors })
+    // Get all artworks first
+    const res = await fetch('/api/artworks')
+    const data = await res.json()
+
+    // Extract unique values
+    const artists = Array.from(new Set(data.map((a: Artwork) => a.artist))) as string[]
+    const styles = Array.from(new Set(data.map((a: Artwork) => a.style))) as string[]
+    const colors = Array.from(new Set(data.flatMap((a: Artwork) => a.colors))) as string[]
+
+    setUniqueValues({ 
+      artists: artists.filter(Boolean),
+      styles: styles.filter(Boolean),
+      colors: colors.filter(Boolean)
+    })
   }
 
   const handleSaveEdit = async (updatedArtwork: Artwork) => {
