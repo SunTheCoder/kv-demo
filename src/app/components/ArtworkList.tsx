@@ -8,7 +8,7 @@ export default function ArtworkList() {
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({
     artist: '',
-    style: '',
+    style: '', 
     color: '',
     yearStart: '',
     yearEnd: ''
@@ -25,7 +25,19 @@ export default function ArtworkList() {
     )
     const res = await fetch(`/api/artworks?${queryParams}`)
     const data = await res.json()
-    setArtworks(data)
+    
+    // Filter artworks based on criteria
+    const filteredArtworks = data.filter(artwork => {
+      const matchesArtist = !filters.artist || artwork.artist === filters.artist
+      const matchesStyle = !filters.style || artwork.style === filters.style
+      const matchesColor = !filters.color || artwork.colors.includes(filters.color)
+      const matchesYearStart = !filters.yearStart || artwork.year >= parseInt(filters.yearStart)
+      const matchesYearEnd = !filters.yearEnd || artwork.year <= parseInt(filters.yearEnd)
+      
+      return matchesArtist && matchesStyle && matchesColor && matchesYearStart && matchesYearEnd
+    })
+
+    setArtworks(filteredArtworks)
     setLoading(false)
   }
 
@@ -42,6 +54,11 @@ export default function ArtworkList() {
     loadUniqueValues()
     loadArtworks()
   }, [])
+
+  // Add filters dependency to trigger reload when filters change
+  useEffect(() => {
+    loadArtworks()
+  }, [filters])
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -142,4 +159,4 @@ export default function ArtworkList() {
       </div>
     </div>
   )
-} 
+}
