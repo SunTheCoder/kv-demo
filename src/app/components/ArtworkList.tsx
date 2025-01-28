@@ -99,9 +99,9 @@ export default function ArtworkList() {
   return (
     <div>
       {editingArtwork ? (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">Edit Artwork</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-900 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700">
+            <h2 className="text-2xl font-bold mb-4 text-white">Edit Artwork</h2>
             <EditArtworkForm
               artwork={editingArtwork}
               onSave={handleSaveEdit}
@@ -111,11 +111,11 @@ export default function ArtworkList() {
         </div>
       ) : null}
       
-      <div className="mb-6 grid grid-cols-5 gap-4">
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4">
         <select
           name="artist"
           onChange={handleFilterChange}
-          className="border p-2 rounded"
+          className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white focus:outline-none focus:border-white"
         >
           <option value="">All Artists</option>
           {uniqueValues.artists.map(artist => (
@@ -126,7 +126,7 @@ export default function ArtworkList() {
         <select
           name="style"
           onChange={handleFilterChange}
-          className="border p-2 rounded"
+          className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white focus:outline-none focus:border-white"
         >
           <option value="">All Styles</option>
           {uniqueValues.styles.map(style => (
@@ -137,7 +137,7 @@ export default function ArtworkList() {
         <select
           name="color"
           onChange={handleFilterChange}
-          className="border p-2 rounded"
+          className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white focus:outline-none focus:border-white"
         >
           <option value="">All Colors</option>
           {uniqueValues.colors.map(color => (
@@ -150,7 +150,7 @@ export default function ArtworkList() {
           name="yearStart"
           placeholder="Start Year"
           onChange={e => setFilters(prev => ({ ...prev, yearStart: e.target.value }))}
-          className="border p-2 rounded"
+          className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white"
         />
 
         <input
@@ -158,13 +158,13 @@ export default function ArtworkList() {
           name="yearEnd"
           placeholder="End Year"
           onChange={e => setFilters(prev => ({ ...prev, yearEnd: e.target.value }))}
-          className="border p-2 rounded"
+          className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white"
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {artworks.map((artwork: Artwork) => (
-          <div key={artwork.id} className="border rounded-lg overflow-hidden shadow-lg">
+          <div key={artwork.id} className="bg-white bg-opacity-10 rounded-lg overflow-hidden border border-gray-700 hover:border-white transition-colors">
             {artwork.imageUrl && (
               <img 
                 src={artwork.imageUrl} 
@@ -173,18 +173,18 @@ export default function ArtworkList() {
               />
             )}
             <div className="p-4">
-              <h2 className="text-xl font-bold">{artwork.title}</h2>
-              <p className="text-gray-600">{artwork.artist}, {artwork.year}</p>
-              <p className="mt-2">{artwork.description}</p>
+              <h2 className="text-xl font-bold text-white">{artwork.title}</h2>
+              <p className="text-gray-400">{artwork.artist}, {artwork.year}</p>
+              <p className="mt-2 text-gray-300">{artwork.description}</p>
               <div className="mt-4">
-                <p className="text-sm text-gray-500">Style: {artwork.style}</p>
-                <p className="text-sm text-gray-500">Medium: {artwork.medium}</p>
-                <p className="text-sm text-gray-500">Dimensions: {artwork.dimensions}</p>
-                <div className="mt-2 flex gap-2">
+                <p className="text-sm text-gray-400">Style: {artwork.style}</p>
+                <p className="text-sm text-gray-400">Medium: {artwork.medium}</p>
+                <p className="text-sm text-gray-400">Dimensions: {artwork.dimensions}</p>
+                <div className="mt-2 flex flex-wrap gap-2">
                   {artwork.colors.map(color => (
                     <span 
                       key={color}
-                      className="px-2 py-1 text-xs rounded text-white"
+                      className="px-2 py-1 text-xs rounded"
                       style={{
                         backgroundColor: color.toLowerCase(),
                         color: ['white', 'yellow', 'pink', 'light'].some(c => color.toLowerCase().includes(c)) ? '#000' : '#fff'
@@ -197,7 +197,7 @@ export default function ArtworkList() {
               </div>
               <button
                 onClick={() => setEditingArtwork(artwork)}
-                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="mt-4 px-4 py-2 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition-all transform hover:scale-105"
               >
                 Edit
               </button>

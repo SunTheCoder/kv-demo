@@ -21,6 +21,7 @@ export default function AddArtworkForm({ onArtworkAdded }: AddArtworkFormProps) 
     dimensions: {
       width: 0,
       height: 0,
+      depth: 0,
       unit: 'in' as DimensionUnit
     } as Dimensions
   })
@@ -52,6 +53,7 @@ export default function AddArtworkForm({ onArtworkAdded }: AddArtworkFormProps) 
           dimensions: {
             width: 0,
             height: 0,
+            depth: 0,
             unit: 'in' as DimensionUnit
           }
         })
@@ -62,162 +64,120 @@ export default function AddArtworkForm({ onArtworkAdded }: AddArtworkFormProps) 
     }
   }
 
-  const handleDimensionChange = (field: keyof Dimensions, value: string) => {
+  const handleChange = (field: keyof typeof formData, value: any) => {
     setFormData(prev => ({
       ...prev,
-      dimensions: {
-        ...prev.dimensions,
-        [field]: field === 'unit' ? value : Number(value)
-      }
+      [field]: field === 'year' ? parseInt(value) : field === 'colors' ? value.split(',').map(c => c.trim()) : value
     }))
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl mx-auto">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Title</label>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input
           type="text"
+          placeholder="Title"
           value={formData.title}
-          onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          onChange={(e) => handleChange('title', e.target.value)}
           required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white"
         />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Artist</label>
         <input
           type="text"
+          placeholder="Artist"
           value={formData.artist}
-          onChange={e => setFormData(prev => ({ ...prev, artist: e.target.value }))}
+          onChange={(e) => handleChange('artist', e.target.value)}
           required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white"
         />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Year</label>
         <input
           type="number"
+          placeholder="Year"
           value={formData.year}
-          onChange={e => setFormData(prev => ({ ...prev, year: Number(e.target.value) }))}
+          onChange={(e) => handleChange('year', parseInt(e.target.value))}
           required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white"
         />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Dimensions</label>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <input
-              type="number"
-              value={formData.dimensions.width || ''}
-              onChange={e => handleDimensionChange('width', e.target.value)}
-              placeholder="Width"
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            />
-          </div>
-          <div>
-            <input
-              type="number"
-              value={formData.dimensions.height || ''}
-              onChange={e => handleDimensionChange('height', e.target.value)}
-              placeholder="Height"
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            />
-          </div>
-          <div>
-            <input
-              type="number"
-              value={formData.dimensions.depth || ''}
-              onChange={e => handleDimensionChange('depth', e.target.value)}
-              placeholder="Depth (optional)"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            />
-          </div>
-          <div>
-            <select
-              value={formData.dimensions.unit}
-              onChange={e => handleDimensionChange('unit', e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            >
-              <option value="in">inches</option>
-              <option value="cm">centimeters</option>
-              <option value="ft">feet</option>
-              <option value="yd">yards</option>
-              <option value="m">meters</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Style</label>
         <input
           type="text"
+          placeholder="Style"
           value={formData.style}
-          onChange={e => setFormData(prev => ({ ...prev, style: e.target.value }))}
+          onChange={(e) => handleChange('style', e.target.value)}
           required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white"
         />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Medium</label>
         <input
           type="text"
+          placeholder="Medium"
           value={formData.medium}
-          onChange={e => setFormData(prev => ({ ...prev, medium: e.target.value }))}
+          onChange={(e) => handleChange('medium', e.target.value)}
           required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white"
         />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Colors</label>
         <input
           type="text"
+          placeholder="Colors (comma-separated)"
           value={formData.colors.join(', ')}
-          onChange={e => setFormData(prev => ({ ...prev, colors: e.target.value.split(',').map(c => c.trim()) }))}
-          placeholder="Separate colors with commas"
+          onChange={(e) => handleChange('colors', e.target.value.split(',').map(c => c.trim()))}
           required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white"
         />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Description</label>
-        <textarea
-          value={formData.description}
-          onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-          rows={3}
-          required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Image URL</label>
+        <div className="flex gap-2">
+          <input
+            type="number"
+            placeholder="Width"
+            value={formData.dimensions.width}
+            onChange={(e) => handleChange('dimensions', { ...formData.dimensions, width: Number(e.target.value) })}
+            required
+            className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white"
+          />
+          <input
+            type="number"
+            placeholder="Height"
+            value={formData.dimensions.height}
+            onChange={(e) => handleChange('dimensions', { ...formData.dimensions, height: Number(e.target.value) })}
+            required
+            className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white"
+          />
+          <input
+            type="number"
+            placeholder="Depth"
+            value={formData.dimensions.depth}
+            onChange={(e) => handleChange('dimensions', { ...formData.dimensions, depth: Number(e.target.value) })}
+            required
+            className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white"
+          />
+          <select
+            value={formData.dimensions.unit}
+            onChange={(e) => handleChange('dimensions', { ...formData.dimensions, unit: e.target.value })}
+            className="w-32 p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white focus:outline-none focus:border-white"
+          >
+            <option value="in">inches</option>
+            <option value="cm">cm</option>
+            <option value="ft">feet</option>
+          </select>
+        </div>
         <input
           type="url"
+          placeholder="Image URL"
           value={formData.imageUrl}
-          onChange={e => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          onChange={(e) => handleChange('imageUrl', e.target.value)}
+          className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white"
         />
       </div>
-
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Add Artwork
-        </button>
-      </div>
+      <textarea
+        placeholder="Description"
+        value={formData.description}
+        onChange={(e) => handleChange('description', e.target.value)}
+        required
+        className="w-full p-2 rounded-lg bg-black bg-opacity-50 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-white h-32"
+      />
+      <button
+        type="submit"
+        className="w-full bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all transform hover:scale-105"
+      >
+        Add Artwork
+      </button>
     </form>
   )
 } 
