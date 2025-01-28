@@ -67,7 +67,7 @@ export default function AddArtworkForm({ onArtworkAdded }: AddArtworkFormProps) 
   const handleChange = (field: keyof typeof formData, value: any) => {
     setFormData(prev => ({
       ...prev,
-      [field]: field === 'year' ? parseInt(value) : field === 'colors' ? value.split(',').map(c => c.trim()) : value
+      [field]: field === 'year' ? parseInt(value) : field === 'colors' ? value.split(',').map((c: string) => c.trim()) : value
     }))
   }
 
