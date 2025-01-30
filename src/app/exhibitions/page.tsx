@@ -6,6 +6,7 @@ import AddExhibitionModal from '../components/AddExhibitionModal'
 import { Exhibition } from '../api/exhibitions/route'
 import ArtworkSelector from '../components/ArtworkSelector'
 import { Artwork } from '@/lib/kv'
+import EditExhibitionModal from '../components/EditExhibitionModal'
 
 export default function ExhibitionsPage() {
   const [exhibitions, setExhibitions] = useState<Exhibition[]>([])
@@ -17,6 +18,7 @@ export default function ExhibitionsPage() {
   const [artworks, setArtworks] = useState<Artwork[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const ARTWORKS_PER_PAGE = 6
+  const [showEditModal, setShowEditModal] = useState(false)
 
   const loadExhibitions = async () => {
     try {
@@ -150,7 +152,25 @@ export default function ExhibitionsPage() {
           <div className="col-span-2 bg-white bg-opacity-10 p-4 rounded-lg">
             {selectedExhibition ? (
               <div>
-                <h2 className="text-2xl font-bold mb-4">{selectedExhibition.title}</h2>
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h2 className="text-2xl font-bold">{selectedExhibition.title}</h2>
+                    {selectedExhibition.artist && (
+                      <p className="text-gray-400 mt-1">Artist: {selectedExhibition.artist}</p>
+                    )}
+                    <p className="text-sm text-gray-400 mt-1">
+                      {new Date(selectedExhibition.startDate).toLocaleDateString()} - {new Date(selectedExhibition.endDate).toLocaleDateString()}
+                    </p>
+                    <p className="text-gray-300 mt-2">{selectedExhibition.description}</p>
+                  </div>
+                  <button
+                    onClick={() => setShowEditModal(true)}
+                    className="px-3 py-1 text-sm bg-gray-800 text-white rounded hover:bg-gray-700 transition-colors"
+                  >
+                    Edit Details
+                  </button>
+                </div>
+
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-lg font-semibold">Selected Artworks</h3>
@@ -322,6 +342,22 @@ export default function ExhibitionsPage() {
           <AddExhibitionModal
             onClose={() => setShowAddModal(false)}
             onExhibitionAdded={loadExhibitions}
+          />
+        )}
+
+        {showEditModal && selectedExhibition && (
+          <EditExhibitionModal
+            exhibition={selectedExhibition}
+            onClose={() => setShowEditModal(false)}
+            onExhibitionUpdated={(updatedExhibition) => {
+              setExhibitions(prevExhibitions => 
+                prevExhibitions.map(ex => 
+                  ex.id === updatedExhibition.id ? updatedExhibition : ex
+                )
+              )
+              setSelectedExhibition(updatedExhibition)
+              setShowEditModal(false)
+            }}
           />
         )}
       </div>

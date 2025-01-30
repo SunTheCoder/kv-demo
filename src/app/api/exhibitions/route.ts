@@ -11,6 +11,7 @@ export interface Exhibition {
   blueprintUrl?: string
   notes: string[]
   artworkIds: string[]
+  artist?: string
 }
 
 export async function GET() {
