@@ -4,10 +4,10 @@ import { Exhibition } from '../route'
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const { id } = params
+    const { id } = context.params
     const updates = await request.json()
     
     const exhibition = await kv.hgetall(`exhibition:${id}`) as Record<string, unknown>
