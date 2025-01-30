@@ -2,12 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { kv } from '@vercel/kv'
 import { Exhibition } from '../route'
 
+type Props = {
+  params: {
+    id: string
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: Props
 ) {
   try {
-    const { id } = params
+    const { id } = props.params
     const updates = await request.json()
     
     const exhibition = await kv.hgetall(`exhibition:${id}`) as Record<string, unknown>
