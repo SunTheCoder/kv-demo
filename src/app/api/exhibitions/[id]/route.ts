@@ -8,7 +8,7 @@ type Props = {
   }
 }
 
-export async function PATCH(
+export async function PUT(
   request: NextRequest,
   props: Props
 ) {
