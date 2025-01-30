@@ -10,22 +10,19 @@ export async function PATCH(
     const { id } = params
     const updates = await request.json()
     
-    const exhibition = await kv.hgetall(`exhibition:${id}`) as Exhibition
+    const exhibition = await kv.hgetall(`exhibition:${id}`) as Record<string, unknown>
     if (!exhibition) {
       return NextResponse.json({ error: 'Exhibition not found' }, { status: 404 })
     }
     
-    // Merge existing data with updates
     const updatedExhibition = {
-      ...exhibition,
+      ...(exhibition as unknown as Exhibition),
       ...updates,
-      id // Ensure ID is preserved
+      id
     }
     
-    // Save the updated exhibition
     await kv.hset(`exhibition:${id}`, updatedExhibition)
     
-    // Return the updated exhibition data
     return NextResponse.json(updatedExhibition)
   } catch (error) {
     return NextResponse.json(
