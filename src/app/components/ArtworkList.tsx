@@ -20,6 +20,7 @@ export default function ArtworkList() {
     colors: [] as string[]
   })
   const [editingArtwork, setEditingArtwork] = useState<Artwork | null>(null)
+  const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(new Set())
 
   const loadArtworks = async () => {
     const queryParams = new URLSearchParams(
@@ -79,6 +80,38 @@ export default function ArtworkList() {
     }
   }
 
+  const handleDelete = async (artworkId: string) => {
+    if (!confirm('Are you sure you want to delete this artwork?')) return;
+    
+    try {
+      const res = await fetch(`/api/artworks/${artworkId}`, {
+        method: 'DELETE',
+      })
+      
+      if (res.ok) {
+        setEditingArtwork(null)
+        loadArtworks() // Reload the list
+      } else {
+        alert('Failed to delete artwork')
+      }
+    } catch (error) {
+      console.error('Error deleting artwork:', error)
+      alert('Error deleting artwork')
+    }
+  }
+
+  const toggleDescription = (artworkId: string) => {
+    setExpandedDescriptions(prev => {
+      const next = new Set(prev)
+      if (next.has(artworkId)) {
+        next.delete(artworkId)
+      } else {
+        next.add(artworkId)
+      }
+      return next
+    })
+  }
+
   useEffect(() => {
     loadUniqueValues()
     loadArtworks()
@@ -101,7 +134,15 @@ export default function ArtworkList() {
       {editingArtwork ? (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-900 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700">
-            <h2 className="text-2xl font-bold mb-4 text-white">Edit Artwork</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-white">Edit Artwork</h2>
+              <button
+                onClick={() => handleDelete(editingArtwork.id)}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all"
+              >
+                Delete
+              </button>
+            </div>
             <EditArtworkForm
               artwork={editingArtwork}
               onSave={handleSaveEdit}
@@ -175,15 +216,27 @@ export default function ArtworkList() {
             <div className="p-4">
               <h2 className="text-xl font-bold text-white">{artwork.title}</h2>
               <p className="text-gray-400">{artwork.artist}, {artwork.year}</p>
-              <p className="mt-2 text-gray-300">{artwork.description}</p>
+              <div className="mt-2">
+                <p className={`text-gray-300 ${!expandedDescriptions.has(artwork.id) ? 'line-clamp-2' : ''}`}>
+                  {artwork.description}
+                </p>
+                {artwork.description.length > 100 && (
+                  <button
+                    onClick={() => toggleDescription(artwork.id)}
+                    className="text-sm text-gray-400 hover:text-white mt-1"
+                  >
+                    {expandedDescriptions.has(artwork.id) ? 'Show less' : 'Read more'}
+                  </button>
+                )}
+              </div>
               <div className="mt-4">
                 <p className="text-sm text-gray-400">Style: {artwork.style}</p>
                 <p className="text-sm text-gray-400">Medium: {artwork.medium}</p>
                 <p className="text-sm text-gray-400">Dimensions: {artwork.dimensions}</p>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {artwork.colors.map(color => (
+                  {artwork.colors.map((color, index) => (
                     <span 
-                      key={color}
+                      key={`${artwork.id}-${color}-${index}`}
                       className="px-2 py-1 text-xs rounded"
                       style={{
                         backgroundColor: color.toLowerCase(),

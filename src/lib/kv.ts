@@ -161,4 +161,20 @@ export async function updateArtwork(id: string, artwork: Artwork) {
     console.error('Error updating artwork:', error)
     return false
   }
+}
+
+export async function deleteArtwork(id: string) {
+  try {
+    // Get all fields of the artwork hash
+    const artwork = await kv.hgetall(`artwork:${id}`)
+    if (!artwork) return false
+
+    // Delete all fields from the hash
+    await kv.del(`artwork:${id}`)  // Changed from hdel to del
+    await kv.srem('artworks', id)
+    return true
+  } catch (error) {
+    console.error('Error deleting artwork:', error)
+    return false
+  }
 } 

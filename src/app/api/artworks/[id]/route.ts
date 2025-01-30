@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getArtwork, updateArtwork } from '@/lib/kv'
+import { NextResponse } from 'next/server'
+import { getArtwork, updateArtwork, deleteArtwork } from '@/lib/kv'
 
 type Params = Promise<{ id: string }>
 
@@ -35,5 +35,23 @@ export async function PUT(
     }
   } catch (error) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const success = await deleteArtwork(id)
+    
+    if (success) {
+      return NextResponse.json({ success: true })
+    } else {
+      return NextResponse.json({ error: 'Failed to delete artwork' }, { status: 500 })
+    }
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 } 
