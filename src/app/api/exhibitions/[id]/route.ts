@@ -1,19 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { kv } from '@vercel/kv'
 import { Exhibition } from '../route'
 
-type Props = {
-  params: {
-    id: string
-  }
-}
-
-export async function PUT(
-  request: NextRequest,
-  props: Props
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = props.params
+    const { id } = await params
     const updates = await request.json()
     
     const exhibition = await kv.hgetall(`exhibition:${id}`) as Record<string, unknown>
@@ -28,7 +22,6 @@ export async function PUT(
     }
     
     await kv.hset(`exhibition:${id}`, updatedExhibition)
-    
     return NextResponse.json(updatedExhibition)
   } catch (error) {
     return NextResponse.json(
