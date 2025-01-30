@@ -1,0 +1,25 @@
+import { NextResponse } from 'next/server'
+import { kv } from '@vercel/kv'
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const updates = await request.json()
+    
+    const exhibition = await kv.hgetall(`exhibition:${id}`)
+    if (!exhibition) {
+      return NextResponse.json({ error: 'Exhibition not found' }, { status: 404 })
+    }
+    
+    await kv.hset(`exhibition:${id}`, { ...exhibition, ...updates })
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to update exhibition' },
+      { status: 500 }
+    )
+  }
+} 
